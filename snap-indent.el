@@ -85,6 +85,13 @@ tab/space conversion and `delete-trailing-whitespace'."
 ;; returns the form itself.) Hence, to distinguish what should be wrapped, we
 ;; must test the value's function-ness not just its list-ness.
 
+(defcustom snap-indent-yank-skip-indent-with-prefix-arg nil
+  "Do not indent yanked text if yank was invoked with a prefix arg.
+
+This can be useful as it lets you skip indent for a single yank
+operation without disabling `snap-indent-mode'."
+  :type 'boolean)
+
 (defun snap-indent-as-list (function-or-list)
   "Return FUNCTION-OR-LIST as a list, treating lambda forms as atoms."
   (if (or (not (listp function-or-list)) (functionp function-or-list))
@@ -107,7 +114,9 @@ tab/space conversion and `delete-trailing-whitespace'."
 
 (defun snap-indent-command-handler ()
   "Indent region text on yank."
-  (when (memq this-command '(yank yank-pop))
+  (when (and (memq this-command '(yank yank-pop))
+             (or (not snap-indent-yank-skip-indent-with-prefix-arg)
+                 (not current-prefix-arg)))
     (snap-indent-indent (region-beginning) (region-end))))
 
 ;;;###Autoload
